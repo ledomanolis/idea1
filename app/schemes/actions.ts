@@ -14,6 +14,7 @@ export async function createScheme(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 console.log("DEBUG user id:", user.id);
+  const { data: authCheck } = await supabase.rpc("debug_auth"); console.log("DEBUG auth check:", JSON.stringify(authCheck));
   const { data, error } = await supabase
     .from("schemes")
     .insert({ name, created_by: user!.id })
