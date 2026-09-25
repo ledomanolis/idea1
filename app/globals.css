@@ -167,6 +167,13 @@ hr.rule { border: none; border-top: 1px solid var(--rule); margin: 6px 0 22px; }
 .check-row.ok { background: var(--ok-soft); border-color: transparent; }
 .check-row.soon { background: var(--amber-soft); border-color: transparent; }
 .check-row.overdue { background: var(--brick-soft); border-color: transparent; }
+.check-link {
+  display: flex; gap: 8px; align-items: flex-start; padding: 4px 0;
+  font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); text-decoration: none;
+}
+.check-link .dot { margin-top: 6px; }
+.check-link:hover { color: var(--ink); text-decoration: underline; }
+.check-link-title { color: var(--ink); font-weight: 600; }
 .check-title { display: block; font-size: 12px; color: var(--ink-soft); margin-bottom: 2px; }
 .check-text { display: block; font-size: 14.5px; line-height: 1.5; }
 

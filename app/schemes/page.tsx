@@ -1,34 +1,39 @@
 import Rail from "@/components/Rail";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { schemeStatus, reviewDue, revisionDue, fmt } from "@/lib/dates";
+import { schemeChecks, worstStatus, type SchemeCheck } from "@/lib/status";
 
 export default async function SchemesOverviewPage() {
   const supabase = createClient();
 
-  const { data: schemes } = await supabase
-    .from("schemes")
-    .select("id, name, provider_name, provider_address, appointed_date")
-    .order("name", { ascending: true });
+  const { data: schemes } = await supabase.from("schemes").select("*").order("name", { ascending: true });
 
   const ids = (schemes || []).map((s) => s.id);
 
-  const [{ data: objectives }, { data: reviews }, { data: revisions }] = ids.length
+  const [{ data: objectives }, { data: reviews }, { data: revisions }, { data: documents }] = ids.length
     ? await Promise.all([
         supabase.from("objectives").select("scheme_id, category, body, date_set").in("scheme_id", ids),
         supabase.from("reviews").select("scheme_id, review_date, services_reviewed, notes").in("scheme_id", ids),
         supabase.from("revisions").select("scheme_id, review_date, changed, notes").in("scheme_id", ids),
+        supabase.from("scheme_documents").select("scheme_id, doc_type, published_on").in("scheme_id", ids),
       ])
-    : [{ data: [] }, { data: [] }, { data: [] }];
+    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
 
-  const groups: Record<string, any[]> = { overdue: [], soon: [], ok: [] };
+  const groups: Record<string, { id: string; name: string; checks: SchemeCheck[] }[]> = {
+    overdue: [],
+    soon: [],
+    ok: [],
+  };
 
   (schemes || []).forEach((s) => {
-    const objs = (objectives || []).filter((o) => o.scheme_id === s.id) as any;
-    const revs = (reviews || []).filter((r) => r.scheme_id === s.id) as any;
-    const revis = (revisions || []).filter((r) => r.scheme_id === s.id) as any;
-    const st = schemeStatus(s as any, objs, revs, revis);
-    groups[st].push({ ...s, objs, revs, revis });
+    const checks = schemeChecks(
+      s,
+      (objectives || []).filter((o) => o.scheme_id === s.id),
+      (reviews || []).filter((r) => r.scheme_id === s.id),
+      (revisions || []).filter((r) => r.scheme_id === s.id),
+      (documents || []).filter((d) => d.scheme_id === s.id)
+    );
+    groups[worstStatus(checks)].push({ id: s.id, name: s.name, checks });
   });
 
   function Group({ title, note, items }: { title: string; note: string; items: any[] }) {
@@ -41,27 +46,27 @@ export default async function SchemesOverviewPage() {
           <div className="empty-state">Nothing here.</div>
         ) : (
           items.map((s) => {
-            const rd = reviewDue(s, s.revs);
-            const vd = revisionDue(s, s.objs, s.revis);
-            const bits: string[] = [];
-            if (s.objs.length === 0) bits.push("No objectives have been set yet.");
-            else {
-              if (rd) bits.push("Annual review due " + fmt(rd));
-              if (vd) bits.push("Objectives revision due " + fmt(vd));
-            }
+            // Order the reminders worst first; on-track schemes list everything.
+            const rank = { overdue: 0, soon: 1, ok: 2 };
+            const shown = [...s.checks]
+              .filter((c) => c.status !== "ok" || items === groups.ok)
+              .sort((a, b) => rank[a.status] - rank[b.status]);
             return (
-              <Link
-                key={s.id}
-                href={`/schemes/${s.id}`}
-                className="obj-card"
-                style={{ display: "block", textDecoration: "none", color: "inherit" }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div className="obj-card" key={s.id}>
+                <Link href={`/schemes/${s.id}`} style={{ color: "inherit", textDecoration: "none" }}>
                   <b>{s.name}</b>
-                  <span className="cat-tag">{s.provider_name || "—"}</span>
+                </Link>
+                <div style={{ marginTop: 8 }}>
+                  {shown.map((c) => (
+                    <Link href={`/schemes/${s.id}#${c.anchor}`} className="check-link" key={c.title}>
+                      <span className={`dot ${c.status}`} />
+                      <span>
+                        <span className="check-link-title">{c.title}:</span> {c.text}
+                      </span>
+                    </Link>
+                  ))}
                 </div>
-                <p className="obj-text">{bits.join(" · ")}</p>
-              </Link>
+              </div>
             );
           })
         )}
@@ -80,9 +85,9 @@ export default async function SchemesOverviewPage() {
                 <h2>Set up your first entry</h2>
               </div>
               <p style={{ color: "var(--ink-soft)", fontSize: 14.5, lineHeight: 1.6 }}>
-                For each scheme, the register tracks the objectives you&apos;ve set for your
-                investment consultant, when they were last reviewed, and when they&apos;re next
-                due.
+                For each scheme, the register keeps its advisers, the objectives set for the
+                investment consultant and its annual reports in one place, and reminds you when
+                each is next due.
               </p>
               <div className="btn-row">
                 <Link href="/schemes/new" className="btn primary" style={{ textDecoration: "none" }}>
@@ -99,12 +104,12 @@ export default async function SchemesOverviewPage() {
               </div>
               <Group
                 title="Action needed"
-                note="Objectives not yet set, or a review/revision is overdue."
+                note="Something is overdue or missing. Click a reminder to go straight to it."
                 items={groups.overdue}
               />
               <Group
                 title="Due soon"
-                note="A review or revision falls due within 60 days."
+                note="Something falls due within 60 days or hasn't been recorded yet."
                 items={groups.soon}
               />
               <Group title="On track" note="Nothing due in the near term." items={groups.ok} />

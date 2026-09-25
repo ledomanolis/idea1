@@ -73,28 +73,6 @@ export function revisionDue(scheme: Scheme, objectives: Objective[], revisions: 
 
 export type Status = "overdue" | "soon" | "ok";
 
-export function schemeStatus(
-  scheme: Scheme,
-  objectives: Objective[],
-  reviews: Review[],
-  revisions: Revision[]
-): Status {
-  if (objectives.length === 0) return "overdue";
-
-  const flags: Status[] = [];
-  [reviewDue(scheme, reviews), revisionDue(scheme, objectives, revisions)].forEach((d) => {
-    if (!d) return;
-    const days = daysUntil(d);
-    if (days < 0) flags.push("overdue");
-    else if (days <= 60) flags.push("soon");
-    else flags.push("ok");
-  });
-
-  if (flags.includes("overdue")) return "overdue";
-  if (flags.includes("soon")) return "soon";
-  return "ok";
-}
-
 export type ComplianceCheck = { title: string; status: Status; text: string };
 
 // Plain-English status lines shown in the scheme's compliance check.

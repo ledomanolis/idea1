@@ -1,32 +1,33 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { schemeStatus } from "@/lib/dates";
+import { schemeChecks, worstStatus } from "@/lib/status";
 
 export default async function Rail({ activeId }: { activeId?: string }) {
   const supabase = createClient();
 
-  const { data: schemes } = await supabase
-    .from("schemes")
-    .select("id, name, provider_name")
-    .order("name", { ascending: true });
+  const { data: schemes } = await supabase.from("schemes").select("*").order("name", { ascending: true });
 
   const ids = (schemes || []).map((s) => s.id);
 
-  const [{ data: objectives }, { data: reviews }, { data: revisions }] = ids.length
+  const [{ data: objectives }, { data: reviews }, { data: revisions }, { data: documents }] = ids.length
     ? await Promise.all([
         supabase.from("objectives").select("scheme_id, category, body, date_set").in("scheme_id", ids),
         supabase.from("reviews").select("scheme_id, review_date, services_reviewed, notes").in("scheme_id", ids),
         supabase.from("revisions").select("scheme_id, review_date, changed, notes").in("scheme_id", ids),
+        supabase.from("scheme_documents").select("scheme_id, doc_type, published_on").in("scheme_id", ids),
       ])
-    : [{ data: [] }, { data: [] }, { data: [] }];
+    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
 
   function statusFor(schemeId: string) {
     const s = (schemes || []).find((x) => x.id === schemeId)!;
-    return schemeStatus(
-      { id: s.id, name: s.name, provider_name: s.provider_name, provider_address: null, appointed_date: null },
-      (objectives || []).filter((o) => o.scheme_id === schemeId) as any,
-      (reviews || []).filter((r) => r.scheme_id === schemeId) as any,
-      (revisions || []).filter((r) => r.scheme_id === schemeId) as any
+    return worstStatus(
+      schemeChecks(
+        s,
+        (objectives || []).filter((o) => o.scheme_id === schemeId),
+        (reviews || []).filter((r) => r.scheme_id === schemeId),
+        (revisions || []).filter((r) => r.scheme_id === schemeId),
+        (documents || []).filter((d) => d.scheme_id === schemeId)
+      )
     );
   }
 

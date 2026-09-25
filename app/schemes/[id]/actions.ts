@@ -14,6 +14,7 @@ export async function updateDetails(formData: FormData) {
     .from("schemes")
     .update({
       name: String(formData.get("name") || "").trim(),
+      tcfd_required: formData.get("tcfd_required") === "on",
     })
     .eq("id", schemeId);
 

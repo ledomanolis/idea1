@@ -27,7 +27,8 @@ can get this live without spending anything to start.
    adds the private file storage for annual reports, and then
    `supabase/003_advisers.sql`, which adds the scheme advisers and their key contacts,
    and finally `supabase/004_publication.sql`, which adds implementation
-   statements and publication dates.
+   statements and publication dates, then `supabase/005_tcfd.sql`, which
+   lets you switch the TCFD report off for smaller schemes.
 4. Open **Authentication -> Providers** and confirm **Email** is enabled
    (it is by default). Turn off "Confirm email" only if you want sign-up
    to be instant — for magic-link sign-in you can leave the default
@@ -134,10 +135,12 @@ lib/
   dates.ts               shared status/date logic used everywhere
   documents.ts           annual report types and publication reminders
   advisers.ts            the scheme advisers and where their details live
+  status.ts              every reminder for a scheme, shared by all pages
 supabase/
   schema.sql             run this once in Supabase's SQL Editor
   002_documents.sql      run this once too: annual report storage
   003_advisers.sql       run this once too: scheme advisers + contacts
   004_publication.sql    run this once too: implementation statements,
                          publication dates
+  005_tcfd.sql           run this once too: TCFD on/off per scheme
 ```

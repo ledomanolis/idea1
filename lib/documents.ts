@@ -23,10 +23,19 @@ export function fileSize(bytes: number | null | undefined): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+// The document types that apply to a scheme: the TCFD report can be
+// switched off for schemes too small to need one.
+export function docTypesFor(tcfdRequired: boolean) {
+  return DOC_TYPES.filter((t) => t.id !== "tcfd" || tcfdRequired);
+}
+
 // One reminder line per document type, based on the most recent
 // version uploaded with a publication date.
-export function publicationChecks(docs: { doc_type: string; published_on: string | null }[]): ComplianceCheck[] {
-  return DOC_TYPES.map((t): ComplianceCheck => {
+export function publicationChecks(
+  docs: { doc_type: string; published_on: string | null }[],
+  tcfdRequired: boolean
+): ComplianceCheck[] {
+  return docTypesFor(tcfdRequired).map((t): ComplianceCheck => {
     const dates = docs
       .filter((d) => d.doc_type === t.id && d.published_on)
       .map((d) => d.published_on as string)

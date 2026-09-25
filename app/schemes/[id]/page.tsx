@@ -1,7 +1,7 @@
 import Rail from "@/components/Rail";
 import DocumentUpload from "@/components/DocumentUpload";
 import { createClient } from "@/lib/supabase/server";
-import { DOC_TYPES, fileSize, publicationChecks } from "@/lib/documents";
+import { docTypesFor, fileSize, publicationChecks } from "@/lib/documents";
 import { ADVISERS } from "@/lib/advisers";
 import { notFound } from "next/navigation";
 import { CATEGORIES, fmt, complianceChecks } from "@/lib/dates";
@@ -50,6 +50,7 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
 
   const docs = (documents || []) as any[];
   const contactList = (contacts || []) as any[];
+  const tcfdRequired = scheme.tcfd_required !== false;
   const objs = (objectives || []) as any[];
   const revs = (reviews || []) as any[];
   const revis = (revisions || []) as any[];
@@ -76,6 +77,18 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
               <div className="field">
                 <label htmlFor="name">Scheme name</label>
                 <input id="name" name="name" defaultValue={scheme.name} />
+              </div>
+              <div className="field" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <input
+                  id="tcfd_required"
+                  name="tcfd_required"
+                  type="checkbox"
+                  defaultChecked={scheme.tcfd_required !== false}
+                  style={{ width: "auto" }}
+                />
+                <label htmlFor="tcfd_required" style={{ margin: 0 }}>
+                  This scheme must produce a TCFD report (untick if it&apos;s too small to be in scope)
+                </label>
               </div>
               <button className="btn" type="submit">
                 Save details
@@ -330,7 +343,7 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
           </section>
 
           {/* Compliance check */}
-          <section className="block">
+          <section className="block" id="compliance-check">
             <h3>Compliance check</h3>
             <p className="block-note">Worked out from the entries above.</p>
             <hr className="rule" />
@@ -346,7 +359,7 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
           </section>
 
           {/* Annual reports */}
-          <section className="block">
+          <section className="block" id="annual-reports">
             <h3>Annual reports</h3>
             <p className="block-note">
               Shared with everyone who has access to this scheme. To edit a report, download it, make your changes
@@ -355,7 +368,7 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
             </p>
             <hr className="rule" />
             <div style={{ marginBottom: 26 }}>
-              {publicationChecks(docs).map((c) => (
+              {publicationChecks(docs, tcfdRequired).map((c) => (
                 <div className={`check-row ${c.status}`} key={c.title}>
                   <span className={`dot ${c.status}`} />
                   <span>
@@ -365,7 +378,7 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
                 </div>
               ))}
             </div>
-            {DOC_TYPES.map((t) => {
+            {docTypesFor(tcfdRequired).map((t) => {
               const typeDocs = docs.filter((d) => d.doc_type === t.id);
               return (
                 <div key={t.id} style={{ marginBottom: 26 }}>
