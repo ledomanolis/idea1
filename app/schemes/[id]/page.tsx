@@ -35,14 +35,12 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
     { data: reviews },
     { data: revisions },
     { data: members },
-    { data: allSchemes },
     { data: documents },
   ] = await Promise.all([
     supabase.from("objectives").select("*").eq("scheme_id", schemeId),
     supabase.from("reviews").select("*").eq("scheme_id", schemeId),
     supabase.from("revisions").select("*").eq("scheme_id", schemeId),
     supabase.from("scheme_members").select("*").eq("scheme_id", schemeId),
-    supabase.from("schemes").select("id").order("name", { ascending: true }),
     supabase
       .from("scheme_documents")
       .select("*")
@@ -55,8 +53,6 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
   const objs = (objectives || []) as any[];
   const revs = (reviews || []) as any[];
   const revis = (revisions || []) as any[];
-
-  const fileIndex = (allSchemes || []).findIndex((s) => s.id === schemeId) + 1;
 
   const rd = reviewDue(scheme as any, revs);
   const vd = revisionDue(scheme as any, objs, revis);
@@ -84,20 +80,17 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
       <main className="content">
         <div className="doc">
           <div className="doc-head">
-            <p className="file-no">Entry No. {String(fileIndex).padStart(3, "0")}</p>
             <h2>{scheme.name}</h2>
             <p className="provider-line">
               Consultant: <b>{scheme.provider_name || "not set"}</b>
               {scheme.appointed_date ? ` · appointed ${fmt(scheme.appointed_date)}` : ""}
             </p>
-            <div className="status-row">
-              {objs.length === 0
-                ? chip("No objectives set", null, "none")
-                : [
-                    chip(`Annual review: ${rd ? fmt(rd) : "—"}`, rd, "review"),
-                    chip(`Revision review: ${vd ? fmt(vd) : "—"}`, vd, "revision"),
-                  ]}
-            </div>
+            {objs.length > 0 && (
+              <div className="status-row">
+                {chip(`Annual review: ${rd ? fmt(rd) : "—"}`, rd, "review")}
+                {chip(`Revision review: ${vd ? fmt(vd) : "—"}`, vd, "revision")}
+              </div>
+            )}
           </div>
 
           {/* Details */}
