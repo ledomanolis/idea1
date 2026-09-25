@@ -1,41 +1,47 @@
 :root {
-  --paper: #f5f6f2;
+  --brand: #3cbf95;
+  --on-brand: #ffffff;
+  --paper: #f3f8f6;
   --paper-raised: #ffffff;
-  --ink: #1c2b39;
-  --ink-soft: #4b5b68;
-  --ink-faint: #8b98a3;
-  --rule: #d8dcd3;
-  --rule-strong: #b7bdb1;
-  --accent: #3f6a72;
-  --accent-soft: #e4ecec;
+  --ink: #17302a;
+  --ink-soft: #4a5f59;
+  --ink-faint: #7f918c;
+  --rule: #dbe7e2;
+  --rule-strong: #bfd3cb;
+  --accent: #16795b;
+  --accent-strong: #11684e;
+  --accent-soft: #e0f4ec;
   --amber: #a8712a;
-  --amber-soft: #f3e7d5;
-  --brick: #a5432f;
-  --brick-soft: #f4e0da;
-  --ok: #4a7a52;
-  --ok-soft: #e4eee2;
-  --radius: 3px;
-  --serif: "Newsreader", Georgia, serif;
-  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --amber-soft: #f7ebd6;
+  --brick: #b0432f;
+  --brick-soft: #f8e1db;
+  --ok: #1f8a5e;
+  --ok-soft: #e0f3e9;
+  --radius: 10px;
+  --serif: "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
+  --sans: "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #161c20;
-    --paper-raised: #1e262b;
-    --ink: #e8ebe6;
-    --ink-soft: #aab4ba;
-    --ink-faint: #6c7880;
-    --rule: #303a3f;
-    --rule-strong: #3f4a50;
-    --accent: #7ba8ae;
-    --accent-soft: #223234;
-    --amber: #cf9a4f;
+    --brand: #2e9e7a;
+    --on-brand: #ffffff;
+    --paper: #0f1a17;
+    --paper-raised: #172521;
+    --ink: #e5f0ec;
+    --ink-soft: #a9bdb6;
+    --ink-faint: #6f837d;
+    --rule: #26362f;
+    --rule-strong: #34483f;
+    --accent: #5fd3ac;
+    --accent-strong: #2e9e7a;
+    --accent-soft: #19332a;
+    --amber: #d9a45a;
     --amber-soft: #33291a;
-    --brick: #d17762;
+    --brick: #e0836d;
     --brick-soft: #3a241f;
-    --ok: #7fb388;
-    --ok-soft: #202b21;
+    --ok: #6fd09f;
+    --ok-soft: #173026;
   }
 }
 
@@ -49,20 +55,19 @@ body {
   line-height: 1.5;
 }
 a { color: var(--accent); }
-h1, h2, h3, h4 { font-family: var(--serif); font-weight: 500; margin: 0; }
+h1, h2, h3, h4 { font-family: var(--serif); font-weight: 800; margin: 0; letter-spacing: -0.01em; }
+h3, h4 { font-weight: 700; }
 
 .shell { display: flex; min-height: 100vh; }
 
 .rail {
   width: 280px; flex: none;
   border-right: 1px solid var(--rule);
-  padding: 28px 0 40px;
+  padding: 0 0 40px;
 }
-.rail-head { padding: 0 24px 18px; border-bottom: 1px solid var(--rule-strong); margin-bottom: 8px; }
-.rail-head .kicker { font-size: 12px; color: var(--ink-faint); margin: 0 0 4px; }
-.rail-head h1 { font-size: 24px; }
-.rail-head h1 a { color: var(--ink); text-decoration: none; }
-.rail-head p { font-size: 12.5px; color: var(--ink-soft); margin: 8px 0 0; }
+.rail-head { padding: 26px 24px 24px; background: var(--brand); margin: 0 0 8px; }
+.rail-head h1 { font-size: 26px; }
+.rail-head h1 a { color: var(--on-brand); text-decoration: none; }
 
 .rail-item {
   display: flex; gap: 10px; align-items: baseline;
@@ -70,7 +75,7 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 500; margin: 0; }
   text-decoration: none; color: var(--ink);
 }
 .rail-item:hover { background: var(--paper-raised); }
-.rail-item.active { background: var(--accent-soft); border-left: 3px solid var(--accent); padding-left: 21px; }
+.rail-item.active { background: var(--accent-soft); border-left: 3px solid var(--brand); padding-left: 21px; }
 
 .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex: none; background: var(--ink-faint); }
 .dot.ok { background: var(--ok); }
@@ -83,7 +88,7 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 500; margin: 0; }
 .content { flex: 1; min-width: 0; }
 .doc { max-width: 720px; margin: 0 auto; padding: 44px 32px 100px; }
 
-.doc-head { border-bottom: 2px solid var(--ink); padding-bottom: 18px; margin-bottom: 28px; }
+.doc-head { border-bottom: 2px solid var(--rule); padding-bottom: 18px; margin-bottom: 28px; }
 .doc-head .file-no { font-size: 12px; color: var(--ink-faint); margin: 0 0 6px; }
 .doc-head h2 { font-size: 32px; margin-bottom: 8px; }
 .doc-head .provider-line { font-size: 14.5px; color: var(--ink-soft); }
@@ -97,7 +102,7 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 500; margin: 0; }
   color: var(--ink-faint); text-decoration: none; border-bottom: 3px solid transparent;
 }
 .tab:hover { color: var(--ink); }
-.tab.active { color: var(--ink); border-bottom-color: var(--accent); }
+.tab.active { color: var(--ink); border-bottom-color: var(--brand); }
 
 .status-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .status-chip {
@@ -155,14 +160,15 @@ hr.rule { border: none; border-top: 1px solid var(--rule); margin: 6px 0 22px; }
 .notes { font-size: 13.5px; color: var(--ink-soft); }
 
 .btn {
-  font-family: var(--sans); font-size: 13.5px; font-weight: 600; padding: 9px 14px; border-radius: var(--radius);
+  font-family: var(--sans); font-size: 13.5px; font-weight: 700; padding: 9px 18px; border-radius: 999px;
   border: 1px solid var(--rule-strong); background: var(--paper-raised); color: var(--ink); cursor: pointer;
 }
-.btn:hover { border-color: var(--ink-soft); }
-.btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.btn.primary:hover { background: var(--accent); border-color: var(--accent); }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.primary { background: var(--accent); color: #ffffff; border-color: var(--accent); }
+.btn.primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); color: #ffffff; }
+.btn:disabled { opacity: 0.6; cursor: default; }
 .btn.danger { color: var(--brick); background: none; border: none; padding: 4px 0; }
-.btn.small { padding: 5px 9px; font-size: 12px; }
+.btn.small { padding: 5px 12px; font-size: 12px; }
 .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
 
 .empty-state {
@@ -206,7 +212,11 @@ hr.rule { border: none; border-top: 1px solid var(--rule); margin: 6px 0 22px; }
 
 @media (max-width: 820px) {
   .shell { flex-direction: column; }
-  .rail { width: 100%; border-right: none; border-bottom: 1px solid var(--rule); padding: 16px 0; }
+  .rail { width: 100%; border-right: none; border-bottom: 1px solid var(--rule); padding: 0 0 16px; }
   .doc { padding: 24px 18px 90px; }
   .field-grid { grid-template-columns: 1fr; }
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--accent-soft);
 }
