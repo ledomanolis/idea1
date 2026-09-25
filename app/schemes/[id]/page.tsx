@@ -81,10 +81,12 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
         <div className="doc">
           <div className="doc-head">
             <h2>{scheme.name}</h2>
-            <p className="provider-line">
-              Consultant: <b>{scheme.provider_name || "not set"}</b>
-              {scheme.appointed_date ? ` · appointed ${fmt(scheme.appointed_date)}` : ""}
-            </p>
+            {scheme.provider_name && (
+              <p className="provider-line">
+                Consultant: <b>{scheme.provider_name}</b>
+                {scheme.appointed_date ? ` · appointed ${fmt(scheme.appointed_date)}` : ""}
+              </p>
+            )}
             {objs.length > 0 && (
               <div className="status-row">
                 {chip(`Annual review: ${rd ? fmt(rd) : "—"}`, rd, "review")}
