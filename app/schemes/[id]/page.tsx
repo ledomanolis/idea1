@@ -129,7 +129,7 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
           <section className="block">
             <h3>Objectives on file</h3>
             <p className="block-note">
-              Part 7 requires objectives covering the areas below before you contract, or continue,
+              You need objectives covering the areas below before you contract, or continue,
               with an investment consultant.
             </p>
             <hr className="rule" />

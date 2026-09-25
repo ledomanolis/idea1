@@ -121,7 +121,7 @@ export function buildStatement(
   );
   lines.push(`Appointed: ${scheme.appointed_date ? fmt(scheme.appointed_date) : "not recorded"}`);
   lines.push("");
-  lines.push(`Objectives set (Part 7): ${haveObjectives ? "Yes" : "No"}`);
+  lines.push(`Objectives set: ${haveObjectives ? "Yes" : "No"}`);
   if (haveObjectives) {
     lines.push(
       `  First set on ${fmt(earliest)}${
