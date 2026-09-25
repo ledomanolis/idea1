@@ -128,10 +128,6 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
           {/* Objectives */}
           <section className="block">
             <h3>Objectives on file</h3>
-            <p className="block-note">
-              You need objectives covering the areas below before you contract, or continue,
-              with an investment consultant.
-            </p>
             <hr className="rule" />
             {sortedObjs.length === 0 ? (
               <div className="empty-state">No objectives recorded yet — this scheme is currently non-compliant.</div>
