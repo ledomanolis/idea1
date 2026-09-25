@@ -1,5 +1,4 @@
 import Rail from "@/components/Rail";
-import CopyButton from "@/components/CopyButton";
 import DocumentUpload from "@/components/DocumentUpload";
 import { createClient } from "@/lib/supabase/server";
 import { DOC_TYPES, fileSize } from "@/lib/documents";
@@ -9,7 +8,7 @@ import {
   fmt,
   reviewDue,
   revisionDue,
-  buildStatement,
+  complianceChecks,
   daysUntil,
 } from "@/lib/dates";
 import {
@@ -104,7 +103,7 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
           {/* Details */}
           <section className="block">
             <h3>Scheme &amp; consultant details</h3>
-            <p className="block-note">These appear on the compliance summary.</p>
+            <p className="block-note">The appointment date sets when the first performance review is due.</p>
             <hr className="rule" />
             <form action={updateDetails}>
               <input type="hidden" name="scheme_id" value={schemeId} />
@@ -295,15 +294,20 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
             </details>
           </section>
 
-          {/* Compliance summary */}
+          {/* Compliance check */}
           <section className="block">
-            <h3>Compliance summary</h3>
-            <p className="block-note">A summary of the entries above, for your records and for confirming compliance in the annual scheme return to The Pensions Regulator.</p>
+            <h3>Compliance check</h3>
+            <p className="block-note">Worked out from the entries above.</p>
             <hr className="rule" />
-            <div className="statement-box">{buildStatement(scheme as any, objs, revs, revis)}</div>
-            <div className="btn-row">
-              <CopyButton text={buildStatement(scheme as any, objs, revs, revis)} />
-            </div>
+            {complianceChecks(scheme as any, objs, revs, revis).map((c) => (
+              <div className={`check-row ${c.status}`} key={c.title}>
+                <span className={`dot ${c.status}`} />
+                <span>
+                  <span className="check-title">{c.title}</span>
+                  <span className="check-text">{c.text}</span>
+                </span>
+              </div>
+            ))}
           </section>
 
           {/* Annual reports */}

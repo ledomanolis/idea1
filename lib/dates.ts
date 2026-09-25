@@ -1,5 +1,5 @@
 // Shared date/status logic — the same rules used across the scheme list
-// and scheme detail pages, and in the compliance summary text.
+// and scheme detail pages, and in the compliance check.
 
 export const CATEGORIES: { id: string; label: string }[] = [
   { id: "investments", label: "Investments held or made on the trustees' behalf" },
@@ -95,63 +95,67 @@ export function schemeStatus(
   return "ok";
 }
 
-export function buildStatement(
-  scheme: Scheme,
-  objectives: Objective[],
-  reviews: Review[],
-  revisions: Revision[]
-): string {
-  const haveObjectives = objectives.length > 0;
-  const earliest = earliestObjectiveDate(objectives);
+export type ComplianceCheck = { title: string; status: Status; text: string };
+
+// Plain-English status lines shown in the scheme's compliance check.
+// Objectives must be reviewed at least every 3 years; the consultant's
+// performance against them at least every 12 months.
+export function complianceChecks(scheme: Scheme, objectives: Objective[], reviews: Review[], revisions: Revision[]): ComplianceCheck[] {
+  if (objectives.length === 0) {
+    return [
+      {
+        title: "Objectives",
+        status: "overdue",
+        text: "No objectives on file. Set objectives for the investment consultant to be compliant.",
+      },
+    ];
+  }
+
+  function statusFor(due: Date): Status {
+    const days = daysUntil(due);
+    return days < 0 ? "overdue" : days <= 60 ? "soon" : "ok";
+  }
+
+  const checks: ComplianceCheck[] = [];
+
   const lastRev = lastRevision(revisions);
-  const lastRev2 = lastReview(reviews);
-  const due = reviewDue(scheme, reviews);
-  const covered = CATEGORIES.filter((c) => objectives.some((o) => o.category === c.id)).map(
-    (c) => c.label
-  );
-
-  const lines: string[] = [];
-  lines.push(`${scheme.name || "This scheme"} — investment consultant compliance summary`);
-  lines.push(`Prepared ${fmt(todayISO())}`);
-  lines.push("");
-  lines.push(
-    `Consultant: ${scheme.provider_name || "not recorded"}${
-      scheme.provider_address ? ", " + scheme.provider_address : ""
-    }`
-  );
-  lines.push(`Appointed: ${scheme.appointed_date ? fmt(scheme.appointed_date) : "not recorded"}`);
-  lines.push("");
-  lines.push(`Objectives set: ${haveObjectives ? "Yes" : "No"}`);
-  if (haveObjectives) {
-    lines.push(
-      `  First set on ${fmt(earliest)}${
-        lastRev ? "; last revised " + fmt(lastRev.review_date) : ""
-      }.`
-    );
-    lines.push(`  Areas covered: ${covered.length ? covered.join("; ") : "none recorded"}.`);
-  } else {
-    lines.push("  No objectives are currently on file for this consultant.");
+  const objBase = lastRev ? lastRev.review_date : earliestObjectiveDate(objectives);
+  const objDue = revisionDue(scheme, objectives, revisions);
+  if (objBase && objDue) {
+    const status = statusFor(objDue);
+    const what = lastRev ? `Objectives last reviewed on ${fmt(objBase)}` : `Objectives set on ${fmt(objBase)} and not yet reviewed`;
+    checks.push({
+      title: "Objectives review (every 3 years)",
+      status,
+      text:
+        status === "overdue"
+          ? `${what}, more than three years ago. Review the objectives now to be compliant.`
+          : `${what}. Next review due by ${fmt(objDue)}.`,
+    });
   }
-  lines.push("");
-  lines.push(`Performance reviewed against objectives: ${lastRev2 ? "Yes" : "No"}`);
-  if (lastRev2) {
-    lines.push(
-      `  Last reviewed ${fmt(lastRev2.review_date)}${
-        lastRev2.notes ? " — " + lastRev2.notes : ""
-      }.`
-    );
-    lines.push(`  Next review due ${due ? fmt(due) : "—"}.`);
-  } else {
-    lines.push("  No review has been logged yet.");
-  }
-  lines.push("");
-  lines.push(
-    `Services reviewed: ${
-      lastRev2 && lastRev2.services_reviewed
-        ? "Yes, as part of the most recent review."
-        : "Not recorded as part of the most recent review."
-    }`
-  );
 
-  return lines.join("\n");
+  const lastPerf = lastReview(reviews);
+  const perfDue = reviewDue(scheme, reviews);
+  if (!perfDue) {
+    checks.push({
+      title: "Performance review (every 12 months)",
+      status: "soon",
+      text: "No performance review logged yet. Add the consultant's appointment date above to see when the first one is due.",
+    });
+  } else {
+    const status = statusFor(perfDue);
+    const what = lastPerf
+      ? `Consultant's performance last reviewed on ${fmt(lastPerf.review_date)}`
+      : `No performance review logged since the consultant was appointed on ${fmt(scheme.appointed_date)}`;
+    checks.push({
+      title: "Performance review (every 12 months)",
+      status,
+      text:
+        status === "overdue"
+          ? `${what}, more than 12 months ago. Review performance against the objectives now to be compliant.`
+          : `${what}. Next review due by ${fmt(perfDue)}.`,
+    });
+  }
+
+  return checks;
 }

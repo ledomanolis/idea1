@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "The Register — Investment Consultant Oversight",
   description:
-    "Objectives, annual reviews and compliance summaries for each scheme's investment consultant.",
+    "Objectives, annual reviews and compliance checks for each scheme's investment consultant.",
 };
 
 export const viewport: Viewport = {

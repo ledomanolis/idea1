@@ -160,10 +160,15 @@ hr.rule { border: none; border-top: 1px solid var(--rule); margin: 6px 0 22px; }
   font-size: 13.5px; color: var(--ink-faint); text-align: center;
 }
 
-.statement-box {
-  background: var(--paper-raised); border: 1px solid var(--rule-strong); border-radius: var(--radius);
-  padding: 18px; font-size: 13.5px; line-height: 1.7; white-space: pre-wrap; font-family: var(--sans);
+.check-row {
+  display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; margin-bottom: 10px;
+  border-radius: var(--radius); background: var(--paper-raised); border: 1px solid var(--rule-strong);
 }
+.check-row.ok { background: var(--ok-soft); border-color: transparent; }
+.check-row.soon { background: var(--amber-soft); border-color: transparent; }
+.check-row.overdue { background: var(--brick-soft); border-color: transparent; }
+.check-title { display: block; font-size: 12px; color: var(--ink-soft); margin-bottom: 2px; }
+.check-text { display: block; font-size: 14.5px; line-height: 1.5; }
 
 .member-row {
   display: flex; justify-content: space-between; align-items: center; padding: 9px 0;
