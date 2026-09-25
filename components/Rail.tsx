@@ -33,7 +33,6 @@ export default async function Rail({ activeId }: { activeId?: string }) {
   return (
     <aside className="rail">
       <div className="rail-head">
-        <p className="kicker">Scheme Administration Regulations · Part 7</p>
         <h1>
           <Link href="/schemes">The Register</Link>
         </h1>

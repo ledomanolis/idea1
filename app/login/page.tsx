@@ -31,9 +31,6 @@ export default function LoginPage() {
 
   return (
     <div className="auth-shell">
-      <p className="block-note" style={{ marginBottom: 8 }}>
-        Scheme Administration Regulations · Part 7
-      </p>
       <h2>The Register</h2>
       <p>
         Sign in to view and edit the schemes you&apos;ve been added to. No password —
