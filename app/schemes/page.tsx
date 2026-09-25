@@ -104,7 +104,7 @@ export default async function SchemesOverviewPage() {
               </div>
               <Group
                 title="Action needed"
-                note="Something is overdue or missing. Click a reminder to go straight to it."
+                note="Immediate action required. Click a reminder to go straight to it."
                 items={groups.overdue}
               />
               <Group
