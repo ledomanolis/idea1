@@ -3,14 +3,7 @@ import DocumentUpload from "@/components/DocumentUpload";
 import { createClient } from "@/lib/supabase/server";
 import { DOC_TYPES, fileSize } from "@/lib/documents";
 import { notFound } from "next/navigation";
-import {
-  CATEGORIES,
-  fmt,
-  reviewDue,
-  revisionDue,
-  complianceChecks,
-  daysUntil,
-} from "@/lib/dates";
+import { CATEGORIES, fmt, complianceChecks } from "@/lib/dates";
 import {
   updateDetails,
   addObjective,
@@ -54,22 +47,6 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
   const revs = (reviews || []) as any[];
   const revis = (revisions || []) as any[];
 
-  const rd = reviewDue(scheme as any, revs);
-  const vd = revisionDue(scheme as any, objs, revis);
-
-  function chip(label: string, when: Date | null, key?: string) {
-    let cls = "ok";
-    if (when) {
-      const days = daysUntil(when);
-      cls = days < 0 ? "overdue" : days <= 60 ? "soon" : "ok";
-    }
-    return (
-      <span className={`status-chip ${cls}`} key={key || label}>
-        <span className="dot2" /> {label}
-      </span>
-    );
-  }
-
   const sortedObjs = [...objs].sort((a, b) => (a.date_set < b.date_set ? 1 : -1));
   const sortedRevs = [...revs].sort((a, b) => (a.review_date < b.review_date ? 1 : -1));
   const sortedRevis = [...revis].sort((a, b) => (a.review_date < b.review_date ? 1 : -1));
@@ -86,12 +63,6 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
                 Consultant: <b>{scheme.provider_name}</b>
                 {scheme.appointed_date ? ` · appointed ${fmt(scheme.appointed_date)}` : ""}
               </p>
-            )}
-            {objs.length > 0 && (
-              <div className="status-row">
-                {chip(`Annual review: ${rd ? fmt(rd) : "—"}`, rd, "review")}
-                {chip(`Revision review: ${vd ? fmt(vd) : "—"}`, vd, "revision")}
-              </div>
             )}
           </div>
 
