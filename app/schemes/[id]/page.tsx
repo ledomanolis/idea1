@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { CATEGORIES, fmt, complianceChecks } from "@/lib/dates";
 import {
   updateDetails,
+  updateAdvisers,
   addObjective,
   deleteObjective,
   addReview,
@@ -58,50 +59,56 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
         <div className="doc">
           <div className="doc-head">
             <h2>{scheme.name}</h2>
-            {scheme.provider_name && (
-              <p className="provider-line">
-                Consultant: <b>{scheme.provider_name}</b>
-                {scheme.appointed_date ? ` · appointed ${fmt(scheme.appointed_date)}` : ""}
-              </p>
-            )}
           </div>
 
           {/* Details */}
           <section className="block">
-            <h3>Scheme &amp; consultant details</h3>
-            <p className="block-note">The appointment date sets when the first performance review is due.</p>
+            <h3>Scheme details</h3>
             <hr className="rule" />
             <form action={updateDetails}>
               <input type="hidden" name="scheme_id" value={schemeId} />
-              <div className="field-grid">
-                <div className="field">
-                  <label htmlFor="name">Scheme name</label>
-                  <input id="name" name="name" defaultValue={scheme.name} />
-                </div>
-                <div className="field">
-                  <label htmlFor="appointed_date">Consultant appointed on</label>
-                  <input
-                    id="appointed_date"
-                    name="appointed_date"
-                    type="date"
-                    defaultValue={scheme.appointed_date || ""}
-                  />
-                </div>
-                <div className="field">
-                  <label htmlFor="provider_name">Investment consultant / firm name</label>
-                  <input id="provider_name" name="provider_name" defaultValue={scheme.provider_name || ""} />
-                </div>
-                <div className="field">
-                  <label htmlFor="provider_address">Consultant&apos;s registered address</label>
-                  <input
-                    id="provider_address"
-                    name="provider_address"
-                    defaultValue={scheme.provider_address || ""}
-                  />
-                </div>
+              <div className="field">
+                <label htmlFor="name">Scheme name</label>
+                <input id="name" name="name" defaultValue={scheme.name} />
               </div>
               <button className="btn" type="submit">
                 Save details
+              </button>
+            </form>
+          </section>
+
+          {/* Advisers */}
+          <section className="block">
+            <h3>Scheme advisers</h3>
+            <p className="block-note">
+              The investment consultant&apos;s appointment date sets when their first performance review is due.
+            </p>
+            <hr className="rule" />
+            <form action={updateAdvisers}>
+              <input type="hidden" name="scheme_id" value={schemeId} />
+              {[
+                { label: "Administrator", nameKey: "admin_name", dateKey: "admin_appointed_date" },
+                { label: "Investment consultant", nameKey: "provider_name", dateKey: "appointed_date" },
+                { label: "Actuary", nameKey: "actuary_name", dateKey: "actuary_appointed_date" },
+              ].map((a) => (
+                <div className="field-grid" key={a.nameKey}>
+                  <div className="field">
+                    <label htmlFor={a.nameKey}>{a.label} (name / firm)</label>
+                    <input id={a.nameKey} name={a.nameKey} defaultValue={(scheme as any)[a.nameKey] || ""} />
+                  </div>
+                  <div className="field">
+                    <label htmlFor={a.dateKey}>Appointed on</label>
+                    <input
+                      id={a.dateKey}
+                      name={a.dateKey}
+                      type="date"
+                      defaultValue={(scheme as any)[a.dateKey] || ""}
+                    />
+                  </div>
+                </div>
+              ))}
+              <button className="btn" type="submit">
+                Save advisers
               </button>
             </form>
           </section>

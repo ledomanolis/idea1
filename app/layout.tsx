@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "The Register — Investment Consultant Oversight",
+  title: "The Register — Scheme Adviser Oversight",
   description:
-    "Objectives, annual reviews and compliance checks for each scheme's investment consultant.",
+    "Advisers, objectives, reviews and annual reports for each pension scheme.",
 };
 
 export const viewport: Viewport = {

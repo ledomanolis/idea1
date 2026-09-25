@@ -13,9 +13,30 @@ export async function updateDetails(formData: FormData) {
     .from("schemes")
     .update({
       name: String(formData.get("name") || "").trim(),
-      provider_name: String(formData.get("provider_name") || "").trim(),
-      provider_address: String(formData.get("provider_address") || "").trim(),
-      appointed_date: String(formData.get("appointed_date") || "") || null,
+    })
+    .eq("id", schemeId);
+
+  if (error) throw new Error(error.message);
+  revalidatePath(`/schemes/${schemeId}`);
+  revalidatePath("/schemes");
+}
+
+export async function updateAdvisers(formData: FormData) {
+  const schemeId = String(formData.get("scheme_id"));
+  const supabase = createClient();
+
+  const text = (key: string) => String(formData.get(key) || "").trim();
+  const date = (key: string) => String(formData.get(key) || "") || null;
+
+  const { error } = await supabase
+    .from("schemes")
+    .update({
+      admin_name: text("admin_name"),
+      admin_appointed_date: date("admin_appointed_date"),
+      provider_name: text("provider_name"),
+      appointed_date: date("appointed_date"),
+      actuary_name: text("actuary_name"),
+      actuary_appointed_date: date("actuary_appointed_date"),
     })
     .eq("id", schemeId);
 

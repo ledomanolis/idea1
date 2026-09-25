@@ -140,7 +140,7 @@ export function complianceChecks(scheme: Scheme, objectives: Objective[], review
     checks.push({
       title: "Performance review (every 12 months)",
       status: "soon",
-      text: "No performance review logged yet. Add the consultant's appointment date above to see when the first one is due.",
+      text: "No performance review logged yet. Add the investment consultant's appointment date under Scheme advisers to see when the first one is due.",
     });
   } else {
     const status = statusFor(perfDue);
