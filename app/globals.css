@@ -94,15 +94,17 @@ h3, h4 { font-weight: 700; }
 .doc-head .provider-line { font-size: 14.5px; color: var(--ink-soft); }
 .doc-head .provider-line b { color: var(--ink); font-weight: 600; }
 
+.doc-head:has(.tabs) { border-bottom: none; padding-bottom: 0; }
 .doc-head .tabs {
-  display: flex; gap: 2px; margin: 20px 0 -20px; overflow-x: auto;
+  display: flex; gap: 4px; margin-top: 20px; padding: 5px; overflow-x: auto;
+  background: var(--brand); border-radius: 999px;
 }
 .tab {
-  padding: 8px 14px 10px; font-size: 13.5px; font-weight: 600; white-space: nowrap;
-  color: var(--ink-faint); text-decoration: none; border-bottom: 3px solid transparent;
+  padding: 8px 16px; font-size: 14px; font-weight: 700; white-space: nowrap; border-radius: 999px;
+  color: var(--on-brand); text-decoration: none;
 }
-.tab:hover { color: var(--ink); }
-.tab.active { color: var(--ink); border-bottom-color: var(--brand); }
+.tab:hover { background: rgba(255, 255, 255, 0.18); }
+.tab.active { background: var(--paper-raised); color: var(--accent-strong); }
 
 .status-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .status-chip {
