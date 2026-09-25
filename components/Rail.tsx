@@ -37,7 +37,6 @@ export default async function Rail({ activeId }: { activeId?: string }) {
         <h1>
           <Link href="/schemes">The Register</Link>
         </h1>
-        <p>Objectives, annual reviews and compliance checks, shared with everyone on a scheme.</p>
       </div>
 
       <Link href="/schemes" className={"rail-item" + (!activeId ? " active" : "")}>
@@ -51,10 +50,7 @@ export default async function Rail({ activeId }: { activeId?: string }) {
       {(schemes || []).map((s) => (
         <Link key={s.id} href={`/schemes/${s.id}`} className={"rail-item" + (activeId === s.id ? " active" : "")}>
           <span className={"dot " + statusFor(s.id)} />
-          <span>
-            <span className="name">{s.name}</span>
-            <span className="sub">{s.provider_name || "No adviser set"}</span>
-          </span>
+          <span className="name">{s.name}</span>
         </Link>
       ))}
 
