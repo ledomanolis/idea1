@@ -120,12 +120,12 @@ app/
   schemes/new/           add a scheme
   schemes/[id]/          a single scheme: details, objectives, annual
                          reports, reviews, revisions, compliance
-                         statement, member access
+                         summary, member access
   schemes/[id]/documents/[docId]/
                          downloads an annual report file
 components/
   Rail.tsx              the left-hand scheme list, shared across pages
-  CopyButton.tsx         "copy to clipboard" for the compliance statement
+  CopyButton.tsx         "copy to clipboard" for the compliance summary
   DocumentUpload.tsx     uploads an annual report straight to storage
 lib/
   supabase/              Supabase client setup (browser + server)

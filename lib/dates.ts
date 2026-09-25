@@ -1,5 +1,5 @@
 // Shared date/status logic — the same rules used across the scheme list
-// and scheme detail pages, and in the compliance statement text.
+// and scheme detail pages, and in the compliance summary text.
 
 export const CATEGORIES: { id: string; label: string }[] = [
   { id: "investments", label: "Investments held or made on the trustees' behalf" },
@@ -111,7 +111,7 @@ export function buildStatement(
   );
 
   const lines: string[] = [];
-  lines.push(`${scheme.name || "This scheme"} — investment consultant compliance statement`);
+  lines.push(`${scheme.name || "This scheme"} — investment consultant compliance summary`);
   lines.push(`Prepared ${fmt(todayISO())}`);
   lines.push("");
   lines.push(

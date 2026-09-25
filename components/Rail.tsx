@@ -36,7 +36,7 @@ export default async function Rail({ activeId }: { activeId?: string }) {
         <h1>
           <Link href="/schemes">The Register</Link>
         </h1>
-        <p>Objectives, annual reviews and compliance statements, shared with everyone on a scheme.</p>
+        <p>Objectives, annual reviews and compliance summaries, shared with everyone on a scheme.</p>
       </div>
 
       <Link href="/schemes" className={"rail-item" + (!activeId ? " active" : "")}>

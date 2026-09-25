@@ -104,7 +104,7 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
           {/* Details */}
           <section className="block">
             <h3>Scheme &amp; consultant details</h3>
-            <p className="block-note">These appear on the compliance statement.</p>
+            <p className="block-note">These appear on the compliance summary.</p>
             <hr className="rule" />
             <form action={updateDetails}>
               <input type="hidden" name="scheme_id" value={schemeId} />
@@ -295,10 +295,10 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
             </details>
           </section>
 
-          {/* Compliance statement */}
+          {/* Compliance summary */}
           <section className="block">
-            <h3>Compliance statement</h3>
-            <p className="block-note">Drafted from the entries above, in the form your annual statement can be built from.</p>
+            <h3>Compliance summary</h3>
+            <p className="block-note">A summary of the entries above, for your records and for confirming compliance in the annual scheme return to The Pensions Regulator.</p>
             <hr className="rule" />
             <div className="statement-box">{buildStatement(scheme as any, objs, revs, revis)}</div>
             <div className="btn-row">
