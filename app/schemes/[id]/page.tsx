@@ -1,6 +1,8 @@
 import Rail from "@/components/Rail";
 import CopyButton from "@/components/CopyButton";
+import DocumentUpload from "@/components/DocumentUpload";
 import { createClient } from "@/lib/supabase/server";
+import { DOC_TYPES, fileSize } from "@/lib/documents";
 import { notFound } from "next/navigation";
 import {
   CATEGORIES,
@@ -19,6 +21,7 @@ import {
   inviteMember,
   removeMember,
   deleteScheme,
+  deleteDocument,
 } from "./actions";
 
 export default async function SchemeDetailPage({ params }: { params: { id: string } }) {
@@ -28,15 +31,28 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
   const { data: scheme } = await supabase.from("schemes").select("*").eq("id", schemeId).maybeSingle();
   if (!scheme) notFound();
 
-  const [{ data: objectives }, { data: reviews }, { data: revisions }, { data: members }, { data: allSchemes }] =
-    await Promise.all([
-      supabase.from("objectives").select("*").eq("scheme_id", schemeId),
-      supabase.from("reviews").select("*").eq("scheme_id", schemeId),
-      supabase.from("revisions").select("*").eq("scheme_id", schemeId),
-      supabase.from("scheme_members").select("*").eq("scheme_id", schemeId),
-      supabase.from("schemes").select("id").order("name", { ascending: true }),
-    ]);
+  const [
+    { data: objectives },
+    { data: reviews },
+    { data: revisions },
+    { data: members },
+    { data: allSchemes },
+    { data: documents },
+  ] = await Promise.all([
+    supabase.from("objectives").select("*").eq("scheme_id", schemeId),
+    supabase.from("reviews").select("*").eq("scheme_id", schemeId),
+    supabase.from("revisions").select("*").eq("scheme_id", schemeId),
+    supabase.from("scheme_members").select("*").eq("scheme_id", schemeId),
+    supabase.from("schemes").select("id").order("name", { ascending: true }),
+    supabase
+      .from("scheme_documents")
+      .select("*")
+      .eq("scheme_id", schemeId)
+      .order("report_year", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false }),
+  ]);
 
+  const docs = (documents || []) as any[];
   const objs = (objectives || []) as any[];
   const revs = (reviews || []) as any[];
   const revis = (revisions || []) as any[];
@@ -179,6 +195,57 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
                 </button>
               </form>
             </details>
+          </section>
+
+          {/* Annual reports */}
+          <section className="block">
+            <h3>Annual reports</h3>
+            <p className="block-note">
+              Shared with everyone who has access to this scheme. To edit a report, download it, make your changes
+              and upload it as a new version. Earlier versions are kept.
+            </p>
+            <hr className="rule" />
+            {DOC_TYPES.map((t) => {
+              const typeDocs = docs.filter((d) => d.doc_type === t.id);
+              return (
+                <div key={t.id} style={{ marginBottom: 26 }}>
+                  <h4 style={{ fontSize: 16, marginBottom: 2 }}>{t.label}</h4>
+                  <p className="block-note" style={{ marginBottom: 8 }}>{t.note}</p>
+                  {typeDocs.length === 0 ? (
+                    <div className="empty-state">Nothing uploaded yet.</div>
+                  ) : (
+                    typeDocs.map((d, i) => (
+                      <div className="log-entry" key={d.id}>
+                        <span className="log-date">{d.report_year || "—"}</span>
+                        <span>
+                          <a href={`/schemes/${schemeId}/documents/${d.id}`}>{d.file_name}</a>
+                          {i === 0 && <span className="badge">latest</span>}
+                          <span className="notes" style={{ display: "block", fontSize: 12.5 }}>
+                            Uploaded {fmt(String(d.created_at).slice(0, 10))}
+                            {d.uploaded_by_email ? ` by ${d.uploaded_by_email}` : ""}
+                            {d.size_bytes ? ` · ${fileSize(d.size_bytes)}` : ""}
+                          </span>
+                          {d.notes && <span className="notes" style={{ display: "block" }}>{d.notes}</span>}
+                        </span>
+                        <form action={deleteDocument}>
+                          <input type="hidden" name="scheme_id" value={schemeId} />
+                          <input type="hidden" name="document_id" value={d.id} />
+                          <button className="btn danger small" type="submit">
+                            Remove
+                          </button>
+                        </form>
+                      </div>
+                    ))
+                  )}
+                  <details style={{ marginTop: 12 }}>
+                    <summary className="btn" style={{ display: "inline-block", listStyle: "none", cursor: "pointer" }}>
+                      {typeDocs.length === 0 ? "+ Upload" : "+ Upload a new version"}
+                    </summary>
+                    <DocumentUpload schemeId={schemeId} docType={t.id} />
+                  </details>
+                </div>
+              );
+            })}
           </section>
 
           {/* Annual reviews */}

@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { DOCUMENTS_BUCKET } from "@/lib/documents";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -132,9 +133,36 @@ export async function removeMember(formData: FormData) {
   revalidatePath(`/schemes/${schemeId}`);
 }
 
+export async function deleteDocument(formData: FormData) {
+  const schemeId = String(formData.get("scheme_id"));
+  const documentId = String(formData.get("document_id"));
+  const supabase = createClient();
+
+  const { data: doc } = await supabase
+    .from("scheme_documents")
+    .select("storage_path")
+    .eq("id", documentId)
+    .maybeSingle();
+  if (!doc) return;
+
+  const { error: storageError } = await supabase.storage.from(DOCUMENTS_BUCKET).remove([doc.storage_path]);
+  if (storageError) throw new Error(storageError.message);
+
+  const { error } = await supabase.from("scheme_documents").delete().eq("id", documentId);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/schemes/${schemeId}`);
+}
+
 export async function deleteScheme(formData: FormData) {
   const schemeId = String(formData.get("scheme_id"));
   const supabase = createClient();
+
+  // Document rows go with the scheme (on delete cascade), but the stored
+  // files don't, so remove those first.
+  const { data: docs } = await supabase.from("scheme_documents").select("storage_path").eq("scheme_id", schemeId);
+  if (docs && docs.length) {
+    await supabase.storage.from(DOCUMENTS_BUCKET).remove(docs.map((d) => d.storage_path));
+  }
 
   const { error } = await supabase.from("schemes").delete().eq("id", schemeId);
   if (error) throw new Error(error.message);

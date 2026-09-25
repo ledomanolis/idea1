@@ -23,7 +23,8 @@ can get this live without spending anything to start.
    **New query**, paste in the entire contents of `supabase/schema.sql`
    from this project, and click **Run**. This creates all the tables and
    the security rules that keep each scheme visible only to the people
-   added to it.
+   added to it. Then do the same with `supabase/002_documents.sql`, which
+   adds the private file storage for annual reports.
 4. Open **Authentication -> Providers** and confirm **Email** is enabled
    (it is by default). Turn off "Confirm email" only if you want sign-up
    to be instant — for magic-link sign-in you can leave the default
@@ -117,14 +118,20 @@ app/
   auth/signout/         signs out
   schemes/               overview of every scheme you're a member of
   schemes/new/           add a scheme
-  schemes/[id]/          a single scheme: details, objectives, reviews,
-                         revisions, compliance statement, member access
+  schemes/[id]/          a single scheme: details, objectives, annual
+                         reports, reviews, revisions, compliance
+                         statement, member access
+  schemes/[id]/documents/[docId]/
+                         downloads an annual report file
 components/
   Rail.tsx              the left-hand scheme list, shared across pages
   CopyButton.tsx         "copy to clipboard" for the compliance statement
+  DocumentUpload.tsx     uploads an annual report straight to storage
 lib/
   supabase/              Supabase client setup (browser + server)
   dates.ts               shared status/date logic used everywhere
+  documents.ts           annual report types (TCFD, SIP, Trustee Report)
 supabase/
   schema.sql             run this once in Supabase's SQL Editor
+  002_documents.sql      run this once too: annual report storage
 ```
