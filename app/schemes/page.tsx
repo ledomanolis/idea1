@@ -2,6 +2,7 @@ import Rail from "@/components/Rail";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { schemeChecks, worstStatus, type SchemeCheck } from "@/lib/status";
+import type { Status } from "@/lib/dates";
 
 export default async function SchemesOverviewPage() {
   const supabase = createClient();
@@ -36,7 +37,15 @@ export default async function SchemesOverviewPage() {
     groups[worstStatus(checks)].push({ id: s.id, name: s.name, checks });
   });
 
-  function Group({ title, note, items }: { title: string; note: string; items: any[] }) {
+  function Group({
+    title,
+    note,
+    items,
+  }: {
+    title: string;
+    note: string;
+    items: { id: string; name: string; checks: SchemeCheck[] }[];
+  }) {
     return (
       <section className="block">
         <h3>{title}</h3>
@@ -47,7 +56,7 @@ export default async function SchemesOverviewPage() {
         ) : (
           items.map((s) => {
             // Order the reminders worst first; on-track schemes list everything.
-            const rank = { overdue: 0, soon: 1, ok: 2 };
+            const rank: Record<Status, number> = { overdue: 0, soon: 1, ok: 2 };
             const shown = [...s.checks]
               .filter((c) => c.status !== "ok" || items === groups.ok)
               .sort((a, b) => rank[a.status] - rank[b.status]);
