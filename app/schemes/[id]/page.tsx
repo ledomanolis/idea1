@@ -197,57 +197,6 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
             </details>
           </section>
 
-          {/* Annual reports */}
-          <section className="block">
-            <h3>Annual reports</h3>
-            <p className="block-note">
-              Shared with everyone who has access to this scheme. To edit a report, download it, make your changes
-              and upload it as a new version. Earlier versions are kept.
-            </p>
-            <hr className="rule" />
-            {DOC_TYPES.map((t) => {
-              const typeDocs = docs.filter((d) => d.doc_type === t.id);
-              return (
-                <div key={t.id} style={{ marginBottom: 26 }}>
-                  <h4 style={{ fontSize: 16, marginBottom: 2 }}>{t.label}</h4>
-                  <p className="block-note" style={{ marginBottom: 8 }}>{t.note}</p>
-                  {typeDocs.length === 0 ? (
-                    <div className="empty-state">Nothing uploaded yet.</div>
-                  ) : (
-                    typeDocs.map((d, i) => (
-                      <div className="log-entry" key={d.id}>
-                        <span className="log-date">{d.report_year || "—"}</span>
-                        <span>
-                          <a href={`/schemes/${schemeId}/documents/${d.id}`}>{d.file_name}</a>
-                          {i === 0 && <span className="badge">latest</span>}
-                          <span className="notes" style={{ display: "block", fontSize: 12.5 }}>
-                            Uploaded {fmt(String(d.created_at).slice(0, 10))}
-                            {d.uploaded_by_email ? ` by ${d.uploaded_by_email}` : ""}
-                            {d.size_bytes ? ` · ${fileSize(d.size_bytes)}` : ""}
-                          </span>
-                          {d.notes && <span className="notes" style={{ display: "block" }}>{d.notes}</span>}
-                        </span>
-                        <form action={deleteDocument}>
-                          <input type="hidden" name="scheme_id" value={schemeId} />
-                          <input type="hidden" name="document_id" value={d.id} />
-                          <button className="btn danger small" type="submit">
-                            Remove
-                          </button>
-                        </form>
-                      </div>
-                    ))
-                  )}
-                  <details style={{ marginTop: 12 }}>
-                    <summary className="btn" style={{ display: "inline-block", listStyle: "none", cursor: "pointer" }}>
-                      {typeDocs.length === 0 ? "+ Upload" : "+ Upload a new version"}
-                    </summary>
-                    <DocumentUpload schemeId={schemeId} docType={t.id} />
-                  </details>
-                </div>
-              );
-            })}
-          </section>
-
           {/* Annual reviews */}
           <section className="block">
             <h3>Annual performance reviews</h3>
@@ -355,6 +304,57 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
             <div className="btn-row">
               <CopyButton text={buildStatement(scheme as any, objs, revs, revis)} />
             </div>
+          </section>
+
+          {/* Annual reports */}
+          <section className="block">
+            <h3>Annual reports</h3>
+            <p className="block-note">
+              Shared with everyone who has access to this scheme. To edit a report, download it, make your changes
+              and upload it as a new version. Earlier versions are kept.
+            </p>
+            <hr className="rule" />
+            {DOC_TYPES.map((t) => {
+              const typeDocs = docs.filter((d) => d.doc_type === t.id);
+              return (
+                <div key={t.id} style={{ marginBottom: 26 }}>
+                  <h4 style={{ fontSize: 16, marginBottom: 2 }}>{t.label}</h4>
+                  <p className="block-note" style={{ marginBottom: 8 }}>{t.note}</p>
+                  {typeDocs.length === 0 ? (
+                    <div className="empty-state">Nothing uploaded yet.</div>
+                  ) : (
+                    typeDocs.map((d, i) => (
+                      <div className="log-entry" key={d.id}>
+                        <span className="log-date">{d.report_year || "—"}</span>
+                        <span>
+                          <a href={`/schemes/${schemeId}/documents/${d.id}`}>{d.file_name}</a>
+                          {i === 0 && <span className="badge">latest</span>}
+                          <span className="notes" style={{ display: "block", fontSize: 12.5 }}>
+                            Uploaded {fmt(String(d.created_at).slice(0, 10))}
+                            {d.uploaded_by_email ? ` by ${d.uploaded_by_email}` : ""}
+                            {d.size_bytes ? ` · ${fileSize(d.size_bytes)}` : ""}
+                          </span>
+                          {d.notes && <span className="notes" style={{ display: "block" }}>{d.notes}</span>}
+                        </span>
+                        <form action={deleteDocument}>
+                          <input type="hidden" name="scheme_id" value={schemeId} />
+                          <input type="hidden" name="document_id" value={d.id} />
+                          <button className="btn danger small" type="submit">
+                            Remove
+                          </button>
+                        </form>
+                      </div>
+                    ))
+                  )}
+                  <details style={{ marginTop: 12 }}>
+                    <summary className="btn" style={{ display: "inline-block", listStyle: "none", cursor: "pointer" }}>
+                      {typeDocs.length === 0 ? "+ Upload" : "+ Upload a new version"}
+                    </summary>
+                    <DocumentUpload schemeId={schemeId} docType={t.id} />
+                  </details>
+                </div>
+              );
+            })}
           </section>
 
           {/* Members */}
