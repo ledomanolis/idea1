@@ -48,6 +48,7 @@ export default function DocumentUpload({ schemeId, docType }: { schemeId: string
       storage_path: path,
       size_bytes: file.size,
       notes: String(data.get("notes") || "").trim(),
+      published_on: String(data.get("published_on") || "") || null,
       uploaded_by_email: user?.email || null,
     });
 
@@ -82,9 +83,15 @@ export default function DocumentUpload({ schemeId, docType }: { schemeId: string
           />
         </div>
       </div>
-      <div className="field">
-        <label htmlFor={`${docType}_notes`}>Notes (optional)</label>
-        <input id={`${docType}_notes`} name="notes" placeholder="e.g. draft for trustee comments" />
+      <div className="field-grid">
+        <div className="field">
+          <label htmlFor={`${docType}_published`}>Published on (leave blank for a draft)</label>
+          <input id={`${docType}_published`} name="published_on" type="date" />
+        </div>
+        <div className="field">
+          <label htmlFor={`${docType}_notes`}>Notes (optional)</label>
+          <input id={`${docType}_notes`} name="notes" placeholder="e.g. draft for trustee comments" />
+        </div>
       </div>
       <button className="btn primary" type="submit" disabled={busy}>
         {busy ? "Uploading…" : "Upload"}

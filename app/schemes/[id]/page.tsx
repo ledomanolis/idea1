@@ -1,7 +1,7 @@
 import Rail from "@/components/Rail";
 import DocumentUpload from "@/components/DocumentUpload";
 import { createClient } from "@/lib/supabase/server";
-import { DOC_TYPES, fileSize } from "@/lib/documents";
+import { DOC_TYPES, fileSize, publicationChecks } from "@/lib/documents";
 import { ADVISERS } from "@/lib/advisers";
 import { notFound } from "next/navigation";
 import { CATEGORIES, fmt, complianceChecks } from "@/lib/dates";
@@ -350,9 +350,21 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
             <h3>Annual reports</h3>
             <p className="block-note">
               Shared with everyone who has access to this scheme. To edit a report, download it, make your changes
-              and upload it as a new version. Earlier versions are kept.
+              and upload it as a new version. Earlier versions are kept. Add a publication date when uploading
+              the published version; the reminders below are based on it.
             </p>
             <hr className="rule" />
+            <div style={{ marginBottom: 26 }}>
+              {publicationChecks(docs).map((c) => (
+                <div className={`check-row ${c.status}`} key={c.title}>
+                  <span className={`dot ${c.status}`} />
+                  <span>
+                    <span className="check-title">{c.title}</span>
+                    <span className="check-text">{c.text}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
             {DOC_TYPES.map((t) => {
               const typeDocs = docs.filter((d) => d.doc_type === t.id);
               return (
@@ -368,6 +380,11 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
                         <span>
                           <a href={`/schemes/${schemeId}/documents/${d.id}`}>{d.file_name}</a>
                           {i === 0 && <span className="badge">latest</span>}
+                          <span className="flags" style={{ marginTop: 4 }}>
+                            <span className={"flag" + (d.published_on ? "" : " off")}>
+                              {d.published_on ? `Published ${fmt(d.published_on)}` : "Draft"}
+                            </span>
+                          </span>
                           <span className="notes" style={{ display: "block", fontSize: 12.5 }}>
                             Uploaded {fmt(String(d.created_at).slice(0, 10))}
                             {d.uploaded_by_email ? ` by ${d.uploaded_by_email}` : ""}
