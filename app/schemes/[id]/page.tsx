@@ -560,9 +560,6 @@ export default async function SchemeDetailPage({
           {/* Members */}
           <section className="block">
             <h3>Who has access</h3>
-            <p className="block-note">
-              Anyone added here — at the client or at the adviser — can sign in with their own email and edit this scheme.
-            </p>
             <hr className="rule" />
             {(members || []).map((m: any) => (
               <div className="member-row" key={m.id}>
