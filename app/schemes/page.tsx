@@ -107,7 +107,6 @@ export default async function SchemesOverviewPage() {
           ) : (
             <>
               <div className="doc-head">
-                <p className="file-no">Register overview</p>
                 <h2>Every scheme, at a glance</h2>
                 <p className="provider-line">{(schemes || []).length} scheme(s) on file</p>
               </div>
