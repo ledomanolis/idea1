@@ -28,7 +28,8 @@ can get this live without spending anything to start.
    `supabase/003_advisers.sql`, which adds the scheme advisers and their key contacts,
    and finally `supabase/004_publication.sql`, which adds implementation
    statements and publication dates, then `supabase/005_tcfd.sql`, which
-   lets you switch the TCFD report off for smaller schemes.
+   lets you switch the TCFD report off for smaller schemes, and
+   `supabase/006_trustees.sql`, which adds each scheme's trustees.
 4. Open **Authentication -> Providers** and confirm **Email** is enabled
    (it is by default). Turn off "Confirm email" only if you want sign-up
    to be instant — for magic-link sign-in you can leave the default
@@ -122,7 +123,8 @@ app/
   auth/signout/         signs out
   schemes/               overview of every scheme you're a member of
   schemes/new/           add a scheme
-  schemes/[id]/          a single scheme: details, advisers, objectives,
+  schemes/[id]/          a single scheme, in tabs: summary, trustees,
+                         advisers, objectives,
                          reviews, revisions, compliance check, annual
                          reports, member access
   schemes/[id]/documents/[docId]/
@@ -143,4 +145,5 @@ supabase/
   004_publication.sql    run this once too: implementation statements,
                          publication dates
   005_tcfd.sql           run this once too: TCFD on/off per scheme
+  006_trustees.sql       run this once too: trustees
 ```

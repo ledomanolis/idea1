@@ -1,13 +1,17 @@
+import Link from "next/link";
 import Rail from "@/components/Rail";
 import DocumentUpload from "@/components/DocumentUpload";
 import { createClient } from "@/lib/supabase/server";
 import { docTypesFor, fileSize, publicationChecks } from "@/lib/documents";
 import { ADVISERS } from "@/lib/advisers";
+import { schemeChecks, checkHref } from "@/lib/status";
 import { notFound } from "next/navigation";
 import { CATEGORIES, fmt, complianceChecks } from "@/lib/dates";
 import {
   updateDetails,
   updateAdviser,
+  addTrustee,
+  removeTrustee,
   addAdviserContact,
   removeAdviserContact,
   addObjective,
@@ -20,9 +24,25 @@ import {
   deleteDocument,
 } from "./actions";
 
-export default async function SchemeDetailPage({ params }: { params: { id: string } }) {
+const TABS = [
+  { id: "summary", label: "Summary" },
+  { id: "trustees", label: "Trustees" },
+  { id: "advisers", label: "Advisers" },
+  { id: "objectives", label: "Objectives" },
+  { id: "reports", label: "Reports" },
+  { id: "access", label: "Access" },
+];
+
+export default async function SchemeDetailPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { tab?: string };
+}) {
   const supabase = createClient();
   const schemeId = params.id;
+  const tab = TABS.some((t) => t.id === searchParams.tab) ? (searchParams.tab as string) : "summary";
 
   const { data: scheme } = await supabase.from("schemes").select("*").eq("id", schemeId).maybeSingle();
   if (!scheme) notFound();
@@ -34,6 +54,7 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
     { data: members },
     { data: documents },
     { data: contacts },
+    { data: trustees },
   ] = await Promise.all([
     supabase.from("objectives").select("*").eq("scheme_id", schemeId),
     supabase.from("reviews").select("*").eq("scheme_id", schemeId),
@@ -46,6 +67,7 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
       .order("report_year", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false }),
     supabase.from("adviser_contacts").select("*").eq("scheme_id", schemeId).order("created_at", { ascending: true }),
+    supabase.from("scheme_trustees").select("*").eq("scheme_id", schemeId).order("created_at", { ascending: true }),
   ]);
 
   const docs = (documents || []) as any[];
@@ -54,6 +76,8 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
   const objs = (objectives || []) as any[];
   const revs = (reviews || []) as any[];
   const revis = (revisions || []) as any[];
+  const trusteeList = (trustees || []) as any[];
+  const checks = schemeChecks(scheme, objs, revs, revis, docs);
 
   const sortedObjs = [...objs].sort((a, b) => (a.date_set < b.date_set ? 1 : -1));
   const sortedRevs = [...revs].sort((a, b) => (a.review_date < b.review_date ? 1 : -1));
@@ -66,8 +90,100 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
         <div className="doc">
           <div className="doc-head">
             <h2>{scheme.name}</h2>
+            <nav className="tabs">
+              {TABS.map((t) => (
+                <Link
+                  key={t.id}
+                  href={`/schemes/${schemeId}?tab=${t.id}`}
+                  className={"tab" + (t.id === tab ? " active" : "")}
+                >
+                  {t.label}
+                </Link>
+              ))}
+            </nav>
           </div>
 
+          {tab === "summary" && (
+            <section className="block">
+              <h3>Reminders</h3>
+              <p className="block-note">Everything due for this scheme. Click a reminder to go straight to it.</p>
+              <hr className="rule" />
+              {checks.map((c) => (
+                <Link
+                  href={checkHref(schemeId, c)}
+                  className={`check-row ${c.status}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                  key={c.title}
+                >
+                  <span className={`dot ${c.status}`} />
+                  <span>
+                    <span className="check-title">{c.title}</span>
+                    <span className="check-text">{c.text}</span>
+                  </span>
+                </Link>
+              ))}
+            </section>
+          )}
+
+          {tab === "trustees" && (
+            <section className="block">
+              <h3>Trustees</h3>
+              <hr className="rule" />
+              {trusteeList.length === 0 ? (
+                <div className="empty-state">No trustees added yet.</div>
+              ) : (
+                trusteeList.map((t) => (
+                  <div className="member-row" key={t.id}>
+                    <span>
+                      <b>{t.name}</b>
+                      {t.role ? ` · ${t.role}` : ""}
+                      {t.email && (
+                        <>
+                          {" · "}
+                          <a href={`mailto:${t.email}`}>{t.email}</a>
+                        </>
+                      )}
+                    </span>
+                    <form action={removeTrustee}>
+                      <input type="hidden" name="scheme_id" value={schemeId} />
+                      <input type="hidden" name="trustee_id" value={t.id} />
+                      <button className="btn danger small" type="submit">
+                        Remove
+                      </button>
+                    </form>
+                  </div>
+                ))
+              )}
+              <details style={{ marginTop: 12 }}>
+                <summary className="btn" style={{ display: "inline-block", listStyle: "none", cursor: "pointer" }}>
+                  + Add a trustee
+                </summary>
+                <form action={addTrustee} style={{ marginTop: 14 }}>
+                  <input type="hidden" name="scheme_id" value={schemeId} />
+                  <div className="field-grid">
+                    <div className="field">
+                      <label htmlFor="trustee_name">Name</label>
+                      <input id="trustee_name" name="name" required />
+                    </div>
+                    <div className="field">
+                      <label htmlFor="trustee_role">Role (optional)</label>
+                      <input id="trustee_role" name="role" placeholder="e.g. Chair, Professional trustee" />
+                    </div>
+                  </div>
+                  <div className="field">
+                    <label htmlFor="trustee_email">Email</label>
+                    <input id="trustee_email" name="email" type="email" placeholder="name@example.com" />
+                  </div>
+                  <button className="btn primary" type="submit">
+                    Add trustee
+                  </button>
+                </form>
+              </details>
+            </section>
+          )}
+
+          {tab === "advisers" && (
+            <>
           {/* Details */}
           <section className="block">
             <h3>Scheme details</h3>
@@ -188,6 +304,11 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
             })}
           </section>
 
+            </>
+          )}
+
+          {tab === "objectives" && (
+            <>
           {/* Objectives */}
           <section className="block">
             <h3>Objectives on file</h3>
@@ -358,6 +479,11 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
             ))}
           </section>
 
+            </>
+          )}
+
+          {tab === "reports" && (
+            <>
           {/* Annual reports */}
           <section className="block" id="annual-reports">
             <h3>Annual reports</h3>
@@ -426,6 +552,11 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
             })}
           </section>
 
+            </>
+          )}
+
+          {tab === "access" && (
+            <>
           {/* Members */}
           <section className="block">
             <h3>Who has access</h3>
@@ -469,6 +600,8 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
               </button>
             </form>
           </section>
+            </>
+          )}
         </div>
       </main>
     </div>

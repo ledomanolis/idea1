@@ -42,6 +42,33 @@ export async function updateAdviser(formData: FormData) {
   revalidatePath("/schemes");
 }
 
+export async function addTrustee(formData: FormData) {
+  const schemeId = String(formData.get("scheme_id"));
+  const name = String(formData.get("name") || "").trim();
+  if (!name) return;
+  const supabase = createClient();
+
+  const { error } = await supabase.from("scheme_trustees").insert({
+    scheme_id: schemeId,
+    name,
+    role: String(formData.get("role") || "").trim(),
+    email: String(formData.get("email") || "").trim(),
+  });
+
+  if (error) throw new Error(error.message);
+  revalidatePath(`/schemes/${schemeId}`);
+}
+
+export async function removeTrustee(formData: FormData) {
+  const schemeId = String(formData.get("scheme_id"));
+  const trusteeId = String(formData.get("trustee_id"));
+  const supabase = createClient();
+
+  const { error } = await supabase.from("scheme_trustees").delete().eq("id", trusteeId);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/schemes/${schemeId}`);
+}
+
 export async function addAdviserContact(formData: FormData) {
   const schemeId = String(formData.get("scheme_id"));
   const name = String(formData.get("name") || "").trim();

@@ -1,7 +1,7 @@
 import Rail from "@/components/Rail";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { schemeChecks, worstStatus, type SchemeCheck } from "@/lib/status";
+import { schemeChecks, worstStatus, checkHref, type SchemeCheck } from "@/lib/status";
 import type { Status } from "@/lib/dates";
 
 export default async function SchemesOverviewPage() {
@@ -67,7 +67,7 @@ export default async function SchemesOverviewPage() {
                 </Link>
                 <div style={{ marginTop: 8 }}>
                   {shown.map((c) => (
-                    <Link href={`/schemes/${s.id}#${c.anchor}`} className="check-link" key={c.title}>
+                    <Link href={checkHref(s.id, c)} className="check-link" key={c.title}>
                       <span className={`dot ${c.status}`} />
                       <span>
                         <span className="check-link-title">{c.title}:</span> {c.text}
