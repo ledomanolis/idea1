@@ -25,7 +25,7 @@ can get this live without spending anything to start.
    the security rules that keep each scheme visible only to the people
    added to it. Then do the same with `supabase/002_documents.sql`, which
    adds the private file storage for annual reports, and then
-   `supabase/003_advisers.sql`, which adds the scheme adviser fields.
+   `supabase/003_advisers.sql`, which adds the scheme advisers and their key contacts.
 4. Open **Authentication -> Providers** and confirm **Email** is enabled
    (it is by default). Turn off "Confirm email" only if you want sign-up
    to be instant — for magic-link sign-in you can leave the default
@@ -131,8 +131,9 @@ lib/
   supabase/              Supabase client setup (browser + server)
   dates.ts               shared status/date logic used everywhere
   documents.ts           annual report types (TCFD, SIP, Trustee Report)
+  advisers.ts            the scheme advisers and where their details live
 supabase/
   schema.sql             run this once in Supabase's SQL Editor
   002_documents.sql      run this once too: annual report storage
-  003_advisers.sql       run this once too: scheme adviser fields
+  003_advisers.sql       run this once too: scheme advisers + contacts
 ```

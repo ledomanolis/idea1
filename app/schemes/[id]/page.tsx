@@ -2,11 +2,14 @@ import Rail from "@/components/Rail";
 import DocumentUpload from "@/components/DocumentUpload";
 import { createClient } from "@/lib/supabase/server";
 import { DOC_TYPES, fileSize } from "@/lib/documents";
+import { ADVISERS } from "@/lib/advisers";
 import { notFound } from "next/navigation";
 import { CATEGORIES, fmt, complianceChecks } from "@/lib/dates";
 import {
   updateDetails,
-  updateAdvisers,
+  updateAdviser,
+  addAdviserContact,
+  removeAdviserContact,
   addObjective,
   deleteObjective,
   addReview,
@@ -30,6 +33,7 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
     { data: revisions },
     { data: members },
     { data: documents },
+    { data: contacts },
   ] = await Promise.all([
     supabase.from("objectives").select("*").eq("scheme_id", schemeId),
     supabase.from("reviews").select("*").eq("scheme_id", schemeId),
@@ -41,9 +45,11 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
       .eq("scheme_id", schemeId)
       .order("report_year", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false }),
+    supabase.from("adviser_contacts").select("*").eq("scheme_id", schemeId).order("created_at", { ascending: true }),
   ]);
 
   const docs = (documents || []) as any[];
+  const contactList = (contacts || []) as any[];
   const objs = (objectives || []) as any[];
   const revs = (reviews || []) as any[];
   const revis = (revisions || []) as any[];
@@ -84,33 +90,89 @@ export default async function SchemeDetailPage({ params }: { params: { id: strin
               The investment consultant&apos;s appointment date sets when their first performance review is due.
             </p>
             <hr className="rule" />
-            <form action={updateAdvisers}>
-              <input type="hidden" name="scheme_id" value={schemeId} />
-              {[
-                { label: "Administrator", nameKey: "admin_name", dateKey: "admin_appointed_date" },
-                { label: "Investment consultant", nameKey: "provider_name", dateKey: "appointed_date" },
-                { label: "Actuary", nameKey: "actuary_name", dateKey: "actuary_appointed_date" },
-              ].map((a) => (
-                <div className="field-grid" key={a.nameKey}>
-                  <div className="field">
-                    <label htmlFor={a.nameKey}>{a.label} (name / firm)</label>
-                    <input id={a.nameKey} name={a.nameKey} defaultValue={(scheme as any)[a.nameKey] || ""} />
-                  </div>
-                  <div className="field">
-                    <label htmlFor={a.dateKey}>Appointed on</label>
-                    <input
-                      id={a.dateKey}
-                      name={a.dateKey}
-                      type="date"
-                      defaultValue={(scheme as any)[a.dateKey] || ""}
-                    />
-                  </div>
+            {ADVISERS.map((a) => {
+              const adviserContacts = contactList.filter((c) => c.adviser === a.id);
+              return (
+                <div key={a.id} style={{ marginBottom: 26 }}>
+                  <h4 style={{ fontSize: 16, marginBottom: 10 }}>{a.label}</h4>
+                  <form action={updateAdviser}>
+                    <input type="hidden" name="scheme_id" value={schemeId} />
+                    <input type="hidden" name="adviser" value={a.id} />
+                    <div className="field-grid">
+                      <div className="field">
+                        <label htmlFor={`${a.id}_name`}>Name / firm</label>
+                        <input id={`${a.id}_name`} name="name" defaultValue={(scheme as any)[a.nameColumn] || ""} />
+                      </div>
+                      <div className="field">
+                        <label htmlFor={`${a.id}_date`}>Appointed on</label>
+                        <input
+                          id={`${a.id}_date`}
+                          name="appointed_date"
+                          type="date"
+                          defaultValue={(scheme as any)[a.dateColumn] || ""}
+                        />
+                      </div>
+                    </div>
+                    <button className="btn small" type="submit">
+                      Save
+                    </button>
+                  </form>
+
+                  <p className="block-note" style={{ margin: "14px 0 4px" }}>Key contacts</p>
+                  {adviserContacts.length === 0 ? (
+                    <p className="notes" style={{ margin: 0 }}>None added yet.</p>
+                  ) : (
+                    adviserContacts.map((c) => (
+                      <div className="member-row" key={c.id}>
+                        <span>
+                          <b>{c.name}</b>
+                          {c.role ? ` · ${c.role}` : ""}
+                          {c.email && (
+                            <>
+                              {" · "}
+                              <a href={`mailto:${c.email}`}>{c.email}</a>
+                            </>
+                          )}
+                        </span>
+                        <form action={removeAdviserContact}>
+                          <input type="hidden" name="scheme_id" value={schemeId} />
+                          <input type="hidden" name="contact_id" value={c.id} />
+                          <button className="btn danger small" type="submit">
+                            Remove
+                          </button>
+                        </form>
+                      </div>
+                    ))
+                  )}
+                  <details style={{ marginTop: 10 }}>
+                    <summary className="btn small" style={{ display: "inline-block", listStyle: "none", cursor: "pointer" }}>
+                      + Add a contact
+                    </summary>
+                    <form action={addAdviserContact} style={{ marginTop: 12 }}>
+                      <input type="hidden" name="scheme_id" value={schemeId} />
+                      <input type="hidden" name="adviser" value={a.id} />
+                      <div className="field-grid">
+                        <div className="field">
+                          <label htmlFor={`${a.id}_contact_name`}>Name</label>
+                          <input id={`${a.id}_contact_name`} name="name" required />
+                        </div>
+                        <div className="field">
+                          <label htmlFor={`${a.id}_contact_role`}>Role (optional)</label>
+                          <input id={`${a.id}_contact_role`} name="role" placeholder="e.g. Scheme actuary" />
+                        </div>
+                      </div>
+                      <div className="field">
+                        <label htmlFor={`${a.id}_contact_email`}>Email</label>
+                        <input id={`${a.id}_contact_email`} name="email" type="email" placeholder="name@example.com" />
+                      </div>
+                      <button className="btn primary small" type="submit">
+                        Add contact
+                      </button>
+                    </form>
+                  </details>
                 </div>
-              ))}
-              <button className="btn" type="submit">
-                Save advisers
-              </button>
-            </form>
+              );
+            })}
           </section>
 
           {/* Objectives */}

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { DOCUMENTS_BUCKET } from "@/lib/documents";
+import { ADVISERS } from "@/lib/advisers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -21,28 +22,51 @@ export async function updateDetails(formData: FormData) {
   revalidatePath("/schemes");
 }
 
-export async function updateAdvisers(formData: FormData) {
+export async function updateAdviser(formData: FormData) {
   const schemeId = String(formData.get("scheme_id"));
+  const adviser = ADVISERS.find((a) => a.id === String(formData.get("adviser")));
+  if (!adviser) return;
   const supabase = createClient();
-
-  const text = (key: string) => String(formData.get(key) || "").trim();
-  const date = (key: string) => String(formData.get(key) || "") || null;
 
   const { error } = await supabase
     .from("schemes")
     .update({
-      admin_name: text("admin_name"),
-      admin_appointed_date: date("admin_appointed_date"),
-      provider_name: text("provider_name"),
-      appointed_date: date("appointed_date"),
-      actuary_name: text("actuary_name"),
-      actuary_appointed_date: date("actuary_appointed_date"),
+      [adviser.nameColumn]: String(formData.get("name") || "").trim(),
+      [adviser.dateColumn]: String(formData.get("appointed_date") || "") || null,
     })
     .eq("id", schemeId);
 
   if (error) throw new Error(error.message);
   revalidatePath(`/schemes/${schemeId}`);
   revalidatePath("/schemes");
+}
+
+export async function addAdviserContact(formData: FormData) {
+  const schemeId = String(formData.get("scheme_id"));
+  const name = String(formData.get("name") || "").trim();
+  if (!name) return;
+  const supabase = createClient();
+
+  const { error } = await supabase.from("adviser_contacts").insert({
+    scheme_id: schemeId,
+    adviser: String(formData.get("adviser")),
+    name,
+    role: String(formData.get("role") || "").trim(),
+    email: String(formData.get("email") || "").trim(),
+  });
+
+  if (error) throw new Error(error.message);
+  revalidatePath(`/schemes/${schemeId}`);
+}
+
+export async function removeAdviserContact(formData: FormData) {
+  const schemeId = String(formData.get("scheme_id"));
+  const contactId = String(formData.get("contact_id"));
+  const supabase = createClient();
+
+  const { error } = await supabase.from("adviser_contacts").delete().eq("id", contactId);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/schemes/${schemeId}`);
 }
 
 export async function addObjective(formData: FormData) {
