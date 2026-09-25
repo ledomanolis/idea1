@@ -5,16 +5,15 @@ import { addMonths, daysUntil, fmt, type ComplianceCheck } from "@/lib/dates";
 
 export const DOCUMENTS_BUCKET = "scheme-documents";
 
-// `annual` types must be published every year; they get a reminder line.
-export const DOC_TYPES: { id: string; label: string; note: string; annual: boolean }[] = [
-  { id: "tcfd", label: "TCFD report", note: "Climate-related financial disclosures.", annual: false },
-  { id: "sip", label: "Statement of Investment Principles", note: "The current SIP and earlier versions.", annual: true },
-  { id: "trustee_report", label: "Trustee Report and Accounts", note: "The annual report and audited accounts.", annual: true },
+// All of these must be published every year; each gets a reminder line.
+export const DOC_TYPES: { id: string; label: string; note: string }[] = [
+  { id: "tcfd", label: "TCFD report", note: "Climate-related financial disclosures." },
+  { id: "sip", label: "Statement of Investment Principles", note: "The current SIP and earlier versions." },
+  { id: "trustee_report", label: "Trustee Report and Accounts", note: "The annual report and audited accounts." },
   {
     id: "implementation_statement",
     label: "Implementation statement",
     note: "How the SIP has been followed over the scheme year.",
-    annual: true,
   },
 ];
 
@@ -24,10 +23,10 @@ export function fileSize(bytes: number | null | undefined): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-// One reminder line per annual document type, based on the most recent
+// One reminder line per document type, based on the most recent
 // version uploaded with a publication date.
 export function publicationChecks(docs: { doc_type: string; published_on: string | null }[]): ComplianceCheck[] {
-  return DOC_TYPES.filter((t) => t.annual).map((t): ComplianceCheck => {
+  return DOC_TYPES.map((t): ComplianceCheck => {
     const dates = docs
       .filter((d) => d.doc_type === t.id && d.published_on)
       .map((d) => d.published_on as string)
