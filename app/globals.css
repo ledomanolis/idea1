@@ -206,9 +206,21 @@ hr.rule { border: none; border-top: 1px solid var(--rule); margin: 6px 0 22px; }
   background: var(--accent-soft); color: var(--accent); margin-left: 8px;
 }
 
-.auth-shell { max-width: 380px; margin: 14vh auto; padding: 0 20px; }
-.auth-shell h2 { font-size: 28px; margin-bottom: 10px; }
-.auth-shell p { color: var(--ink-soft); font-size: 14px; margin-bottom: 20px; }
+.auth-page {
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 32px 16px; background: var(--brand);
+}
+.auth-title { color: var(--on-brand); font-size: 36px; margin-bottom: 22px; text-align: center; }
+.auth-card {
+  width: 100%; max-width: 400px; background: var(--paper-raised); border-radius: 18px;
+  padding: 28px 28px 30px; box-shadow: 0 16px 40px rgba(12, 60, 45, 0.18);
+}
+.auth-card h2 { font-size: 24px; margin-bottom: 8px; }
+.auth-card p { color: var(--ink-soft); font-size: 14px; margin: 0 0 20px; }
+.auth-sent {
+  background: var(--accent-soft); border-radius: var(--radius); padding: 16px;
+  font-size: 14px; line-height: 1.5;
+}
 
 .topbar { display: none; }
 

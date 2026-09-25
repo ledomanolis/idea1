@@ -30,15 +30,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="auth-shell">
-      <h2>The Register</h2>
+    <div className="auth-page">
+      <h1 className="auth-title">The Register</h1>
+      <div className="auth-card">
+      <h2>Sign in</h2>
       <p>
         Sign in to view and edit the schemes you&apos;ve been added to. No password —
         we&apos;ll email you a one-time link.
       </p>
 
       {status === "sent" ? (
-        <div className="empty-state" style={{ textAlign: "left" }}>
+        <div className="auth-sent">
           Check <b>{email}</b> for a sign-in link. You can close this tab once you&apos;ve
           clicked it.
         </div>
@@ -59,11 +61,12 @@ export default function LoginPage() {
           {status === "error" && (
             <p style={{ color: "var(--brick)", fontSize: 13, marginBottom: 12 }}>{errorMsg}</p>
           )}
-          <button className="btn primary" type="submit" disabled={status === "sending"}>
+          <button className="btn primary" type="submit" disabled={status === "sending"} style={{ width: "100%" }}>
             {status === "sending" ? "Sending link…" : "Send sign-in link"}
           </button>
         </form>
       )}
+      </div>
     </div>
   );
 }
